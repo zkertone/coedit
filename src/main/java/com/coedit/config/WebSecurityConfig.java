@@ -8,9 +8,5 @@ import org.springframework.security.config.BeanIds;
 @Configuration
 public class WebSecurityConfig
 {
-     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-     @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+
 }
