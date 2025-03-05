@@ -1,5 +1,6 @@
 package com.coedit.config;
 
+import com.coedit.service.intf.RedisTokenService;
 import com.coedit.utils.JwtRedisAuthenticationFilter;
 import com.coedit.utils.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
@@ -15,10 +16,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final RedisTokenService redisTokenService;
 
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider,
+                          UserDetailsService userDetailsService,
+                          RedisTokenService redisTokenService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
+        this.redisTokenService = redisTokenService;
     }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -29,7 +34,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated() //其他请求需要认证
                         .and()
                         .addFilterBefore(
-                                new JwtRedisAuthenticationFilter(jwtTokenProvider,userDetailsService),
+                                new JwtRedisAuthenticationFilter(jwtTokenProvider,userDetailsService,redisTokenService),
                                 UsernamePasswordAuthenticationFilter.class //将JWT过滤器添加到过滤器链中
                         )
                 );
