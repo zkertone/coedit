@@ -1,12 +1,12 @@
 package com.coedit.controller;
 
 import com.coedit.model.entity.User;
+import com.coedit.service.intf.RedisTokenService;
 import com.coedit.service.intf.UserService;
 import com.coedit.utils.JwtTokenProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,12 +22,15 @@ public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final RedisTokenService redisTokenService;
 
     public AuthController(JwtTokenProvider jwtTokenProvider,
-                          UserService userService
+                          UserService userService,
+                          RedisTokenService redisTokenService
             ){
         this.jwtTokenProvider = jwtTokenProvider;
         this.userService = userService;
+        this.redisTokenService = redisTokenService;
     }
 
     @PostMapping("/login")
@@ -37,6 +40,7 @@ public class AuthController {
        userService.loginUser(user.getUsername(), user.getPassword());
         // 2. 生成Token
         String token = jwtTokenProvider.generateToken(user.getUsername());
+        redisTokenService.storeToken(token,user.getId(),3600);
         //3.返回响应
         return ResponseEntity.ok(Map.of( "accessToken", token));
     }catch (UsernameNotFoundException | BadCredentialsException e){

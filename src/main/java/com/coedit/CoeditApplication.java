@@ -9,7 +9,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.coedit"})
 public class CoeditApplication {
 
 	public static void main(String[] args) {
