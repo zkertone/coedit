@@ -29,14 +29,13 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .authorizeRequests(auth -> auth
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() //允许公开访问的端点
                         .anyRequest().authenticated() //其他请求需要认证
-                        .and()
-                        .addFilterBefore(
-                                new JwtRedisAuthenticationFilter(jwtTokenProvider,userDetailsService,redisTokenService),
-                                UsernamePasswordAuthenticationFilter.class //将JWT过滤器添加到过滤器链中
-                        )
+                )
+                .addFilterBefore(
+                        new JwtRedisAuthenticationFilter(jwtTokenProvider,userDetailsService,redisTokenService),
+                        UsernamePasswordAuthenticationFilter.class //将JWT过滤器添加到过滤器链中
                 );
 
         return http.build();
