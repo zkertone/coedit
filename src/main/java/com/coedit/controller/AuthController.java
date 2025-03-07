@@ -33,20 +33,26 @@ public class AuthController {
         this.redisTokenService = redisTokenService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/login") 
     public ResponseEntity<?> login(@RequestBody User user){
-    try{
-        // 1. 验证用户名密码（伪代码）
-       userService.loginUser(user.getUsername(), user.getPassword());
-        // 2. 生成Token
-        String token = jwtTokenProvider.generateToken(user.getUsername());
-        redisTokenService.storeToken(token,user.getId(),3600);
-        //3.返回响应
-        return ResponseEntity.ok(Map.of( "accessToken", token));
-    }catch (UsernameNotFoundException | BadCredentialsException e){
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "用户名或密码错误"));
-
-    }
+        try {
+            // 1. 验证用户名密码
+            userService.loginUser(user.getUsername(), user.getPassword());
+            
+            // 2. 生成Token并存储
+            String token = jwtTokenProvider.generateToken(user.getUsername());
+            redisTokenService.storeToken(token, user.getId(), 3600);
+            
+            // 3. 返回响应
+            return ResponseEntity.ok(Map.of(
+                "accessToken", token,
+                "tokenType", "Bearer"
+            ));
+            
+        } catch (UsernameNotFoundException | BadCredentialsException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "用户名或密码错误"));
+        }
     }
     @PostMapping("/register")
     public ResponseEntity<?> register( @RequestBody User user) {

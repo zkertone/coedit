@@ -50,6 +50,10 @@ public class DocumentServiceImpl implements DocumentService {
     public DocumentEntity getDocumentById(String documentId, String userId) {
         DocumentEntity document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentNotFoundException("文档不存在"));
+        if (!hasAccessPermission(document, userId)) {
+            throw new PermissionDeniedException("无权访问此文档");
+        }
+        return document;
     }
 
     //权限管理

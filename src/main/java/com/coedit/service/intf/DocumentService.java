@@ -1,7 +1,6 @@
 package com.coedit.service.intf;
 
 import com.coedit.model.entity.DocumentEntity;
-import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -9,19 +8,14 @@ public interface DocumentService {
   
     public DocumentEntity createDocument(DocumentEntity document);
 
-    public DocumentEntity updateDocument(String documentId, DocumentEntity document);
+    public DocumentEntity updateDocument(String documentId, String newContent, String userId);
 
-    public void deleteDocument(String documentId);
+    public void deleteDocument(String documentId, String userId);
 
-    public DocumentEntity getDocumentById(String documentId);
+    public DocumentEntity getDocumentById(String documentId, String userId);
 
-    public void addPermission(String documentId, String userId, String permission);
+    public void addPermission(String documentId, String targetUserId, String role, String operationId);
 
-    public void removePermission(String documentId, String userId);
-
-    public List<String> getPermissions(String documentId);
-
-    public boolean checkAccessPermission(String documentId, String userId);
+    public void removePermission(String documentId, String targetUserId, String operationId);
     
-    public boolean checkEditPermission(String documentId, String userId);
 }
