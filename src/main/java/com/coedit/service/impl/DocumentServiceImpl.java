@@ -4,11 +4,10 @@ import com.coedit.model.entity.DocumentEntity;
 import com.coedit.repository.DocumentRepository;
 import com.coedit.service.intf.DocumentService;
 import com.coedit.exception.DocumentNotFoundException;
+import com.coedit.exception.PermissionDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -21,61 +20,70 @@ public class DocumentServiceImpl implements DocumentService {
         DocumentEntity documentEntity = new DocumentEntity();
         documentEntity.setTitle(document.getTitle());
         documentEntity.setCreatorId(document.getCreatorId());
-        documentEntity.setCreatedAt(Instant.now().toString());
-        documentEntity.setUpdatedAt(Instant.now().toString());
-        documentEntity.getPermissions().put(document.getCreatorId(), "owner");
+        documentEntity.setCreatedAt(Instant.now());
+        documentEntity.setUpdatedAt(Instant.now());
+        documentEntity.getPermissions().put(document.getCreatorId(), "OWNER");
         return documentRepository.save(documentEntity);
     }
 
     @Override
-    public DocumentEntity updateDocument(String documentId, DocumentEntity document) {
-        document.setId(documentId);
+    public DocumentEntity updateDocument(String documentId,String newContent, String userId) {
+        DocumentEntity document = getDocumentById(documentId, userId);
+        if (!hasEditPermission(document, userId)) {
+            throw new PermissionDeniedException("仅所有者或编辑者可修改文档");
+        }
+        document.setContent(newContent);
+        document.setUpdatedAt(Instant.now());
         return documentRepository.save(document);
     }
 
     @Override
-    public void deleteDocument(String documentId) {
+    public void deleteDocument(String documentId, String userId) {
+        DocumentEntity document = getDocumentById(documentId, userId);
+        if (!isOwner(document, userId)) {
+            throw new PermissionDeniedException("仅所有者可删除文档");
+        }
         documentRepository.deleteById(documentId);
     }
 
     @Override
-    public DocumentEntity getDocumentById(String documentId) {
-        return documentRepository.findById(documentId)
+    public DocumentEntity getDocumentById(String documentId, String userId) {
+        DocumentEntity document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentNotFoundException("文档不存在"));
     }
 
     //权限管理
     @Override
-    public void addPermission(String documentId, String userId, String permission) {
-        DocumentEntity document = getDocumentById(documentId);
-        document.getPermissions().put(userId, permission);
+    public void addPermission(String documentId, String targetUserId, String role,String operationId) {
+        DocumentEntity document = getDocumentById(documentId, operationId);
+        if (!isOwner(document, operationId)) {
+            throw new PermissionDeniedException("仅所有者可添加权限");
+        }
+        document.getPermissions().put(targetUserId, role);
         documentRepository.save(document);
     }
 
     @Override
-    public void removePermission(String documentId, String userId) {
-        DocumentEntity document = getDocumentById(documentId);
-        document.getPermissions().remove(userId);
+    public void removePermission(String documentId, String targetUserId,String operationId) {
+        DocumentEntity document = getDocumentById(documentId, operationId);
+        if (!isOwner(document, operationId)) {
+            throw new PermissionDeniedException("仅所有者可删除权限");
+        }
+        document.getPermissions().remove(targetUserId);
         documentRepository.save(document);
-    }
-
-    @Override
-    public List<String> getPermissions(String documentId) {
-        DocumentEntity document = getDocumentById(documentId);
-        return new ArrayList<>(document.getPermissions().keySet());
     }
 
     //权限校验工具方法
-    @Override
-    public boolean hasAccessPermission(DocumentEntity document, String userId) {
+    private boolean hasAccessPermission(DocumentEntity document, String userId) {
         return document.getPermissions().containsKey(userId) || document.getCreatorId().equals(userId);
     }
 
-    @Override
-    public boolean hasEditPermission(DocumentEntity document, String userId) {
+    private boolean hasEditPermission(DocumentEntity document, String userId) {
         String role = document.getPermissions().get(userId);
         return "OWNER".equals(role) || "EDITOR".equals(role);
     }
     
-    
+    private boolean isOwner(DocumentEntity document, String userId) {
+        return "OWNER".equals(document.getPermissions().get(userId)) || document.getCreatorId().equals(userId);
+    }
 }
