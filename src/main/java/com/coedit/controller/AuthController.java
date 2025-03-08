@@ -41,12 +41,16 @@ public class AuthController {
             
             // 2. 生成Token并存储
             String token = jwtTokenProvider.generateToken(user.getUsername());
-            redisTokenService.storeToken(token, user.getId(), 3600);
+            User userFind = userService.findByUsername(user.getUsername());
+            redisTokenService.storeToken(token, userFind.getId(), 3600);
             
             // 3. 返回响应
             return ResponseEntity.ok(Map.of(
-                "accessToken", token,
-                "tokenType", "Bearer"
+                "userId", userFind.getId(),
+                "username", userFind.getUsername(),
+                "accessToken", "Bearer " + token,
+                "tokenType", "Bearer",
+                "expiresIn", 3600
             ));
             
         } catch (UsernameNotFoundException | BadCredentialsException e) {

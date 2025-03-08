@@ -64,6 +64,8 @@ public class JwtTokenProvider {
      */
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "access_token");
+        claims.put("username", username);
         return buildToken(claims, username);
     }
     
@@ -74,12 +76,17 @@ public class JwtTokenProvider {
      * @return JWT令牌字符串
      */
     private String buildToken(Map<String, Object> claims, String subject) {
+        long nowMillis = System.currentTimeMillis();
+        Date now = new Date(nowMillis);
+        Date exp = new Date(nowMillis + expiration);
+
         return Jwts.builder()
-                .claims(claims)             // 自定义声明（如角色）
-                .subject(subject)           // 主题（通常放用户名）
-                .issuedAt(new Date())       // 签发时间
-                .expiration(new Date(System.currentTimeMillis() + expiration))  // 过期时间
-                .signWith(getSigningKey())  // 签名算法（默认使用 HS256）
+                .claims(claims)             // 自定义声明
+                .subject(subject)           // 主题（用户名）
+                .issuedAt(now)             // 签发时间
+                .notBefore(now)            // 生效时间
+                .expiration(exp)           // 过期时间
+                .signWith(getSigningKey(), io.jsonwebtoken.SignatureAlgorithm.HS256)  // 显式指定签名算法
                 .compact();
     }
 
@@ -90,10 +97,17 @@ public class JwtTokenProvider {
      */
     public boolean validateToken(String token) {
         try {
-            parseToken(token);
-            return true;
-        }
-        catch (Exception e) {
+            if (token == null || token.isEmpty()) {
+                return false;
+            }
+            // 移除 "Bearer " 前缀
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            Claims claims = parseToken(token);
+            // 检查令牌是否过期
+            return !claims.getExpiration().before(new Date());
+        } catch (Exception e) {
             return false;
         }
     }

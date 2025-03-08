@@ -58,7 +58,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         //3.密码加密
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         //4.设置默认角色
-        user.setRoles(Collections.singletonList("ROLE_USER"));
+        user.setRoles(Collections.singletonList("USER"));
         //5.保存用户
         return userRepository.save(user);
     }
