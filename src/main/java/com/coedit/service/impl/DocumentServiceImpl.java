@@ -21,7 +21,6 @@ public class DocumentServiceImpl implements DocumentService {
         documentEntity.setTitle(document.getTitle());
         documentEntity.setCreatorId(document.getCreatorId());
         documentEntity.setCreatedAt(Instant.now());
-        documentEntity.setUpdatedAt(Instant.now());
         documentEntity.getPermissions().put(document.getCreatorId(), "OWNER");
         return documentRepository.save(documentEntity);
     }
