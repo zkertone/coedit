@@ -118,7 +118,14 @@ public class JwtTokenProvider {
      * @return 用户名
      */
     public String getUsernameFromToken(String token) {
-        return getClaimFromToken(token, Claims::getSubject);
+        try {
+            if (token == null || token.isEmpty()) {
+                return null;
+            }
+            return getClaimFromToken(token, Claims::getSubject);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -128,8 +135,12 @@ public class JwtTokenProvider {
      * @return 解析后的声明值
      */
     private <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = parseToken(token);
-        return claimsResolver.apply(claims);
+        try {
+            final Claims claims = parseToken(token);
+            return claimsResolver.apply(claims);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -138,6 +149,9 @@ public class JwtTokenProvider {
      * @return JWT声明集
      */
     private Claims parseToken(String token) {
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Token cannot be null or empty");
+        }
         return jwtParser.parseSignedClaims(token).getPayload();
     }
 }

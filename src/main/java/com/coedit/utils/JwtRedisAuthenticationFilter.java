@@ -55,7 +55,16 @@ public class JwtRedisAuthenticationFilter extends OncePerRequestFilter {
             }
 
             String username = jwtTokenProvider.getUsernameFromToken(token);
+            if (username == null || username.isEmpty()) {
+                handleAuthenticationError(response, "Token中不包含有效的用户名");
+                return;
+            }
+            
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (userDetails == null) {
+                handleAuthenticationError(response, "无法加载用户详情");
+                return;
+            }
             
             UsernamePasswordAuthenticationToken authentication = 
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

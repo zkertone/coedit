@@ -17,6 +17,10 @@ public class RedisTokenServiceImpl implements RedisTokenService {
 
     @Override
     public void storeToken(String token, String userId, long expirationTime) {
+        if (token == null || token.isEmpty() || userId == null || userId.isEmpty()) {
+            return;
+        }
+        
         if (expirationTime <= 0) {
             expirationTime = DEFAULT_EXPIRATION;
         }

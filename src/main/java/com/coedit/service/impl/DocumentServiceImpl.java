@@ -8,7 +8,7 @@ import com.coedit.exception.PermissionDeniedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
-
+import java.util.List;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
@@ -53,6 +53,11 @@ public class DocumentServiceImpl implements DocumentService {
             throw new PermissionDeniedException("无权访问此文档");
         }
         return document;
+    }
+
+    @Override
+    public List<DocumentEntity> fetchAllDocuments(String creatorId) {
+        return documentRepository.findAllByCreatorId(creatorId);
     }
 
     //权限管理

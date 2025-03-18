@@ -47,6 +47,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
     @Override
     public User reisterUser(User user) {
+        //检查信息是否为空
+        if(user.getUsername() == null || user.getPassword() == null || user.getEmail() == null){
+            throw new RuntimeException("信息不能为空");
+        }
+
         //1.检查用户名是否存在
         if(userRepository.existsByUsername(user.getUsername())){
             throw new RuntimeException("用户名已被注册");

@@ -13,7 +13,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document(collection = "documents")
 public class DocumentEntity {
-    @Id
+    @Id 
     private String id;
 
     @Indexed(unique = true)
