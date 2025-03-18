@@ -3,6 +3,8 @@ package com.coedit.service.intf;
 import com.coedit.model.entity.DocumentEntity;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Map;
+
 @Service
 public interface DocumentService {
   
@@ -17,6 +19,8 @@ public interface DocumentService {
     public void addPermission(String documentId, String targetUserId, String role, String operationId);
 
     public void removePermission(String documentId, String targetUserId, String operationId);
+
+    public Map<String, String> getDocumentPermissions(String documentId);
     
     //查询全部
     public List<DocumentEntity> fetchAllDocuments(String creatorId);

@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 @Service
 public class DocumentServiceImpl implements DocumentService {
 
@@ -21,6 +22,7 @@ public class DocumentServiceImpl implements DocumentService {
         documentEntity.setTitle(document.getTitle());
         documentEntity.setCreatorId(document.getCreatorId());
         documentEntity.setCreatedAt(Instant.now());
+        documentEntity.setUpdatedAt(Instant.now()); 
         documentEntity.getPermissions().put(document.getCreatorId(), "OWNER");
         return documentRepository.save(documentEntity);
     }
@@ -81,6 +83,12 @@ public class DocumentServiceImpl implements DocumentService {
         documentRepository.save(document);
     }
 
+    @Override
+    public Map<String, String> getDocumentPermissions(String documentId) {
+        return documentRepository.findById(documentId)
+                .orElseThrow(() -> new DocumentNotFoundException("文档不存在"))
+                .getPermissions();
+    }
     //权限校验工具方法
     private boolean hasAccessPermission(DocumentEntity document, String userId) {
         return document.getPermissions().containsKey(userId) || document.getCreatorId().equals(userId);

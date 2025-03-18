@@ -2,14 +2,14 @@ package com.coedit.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.coedit.model.entity.DocumentEntity;
 import com.coedit.service.intf.DocumentService;
 import java.net.URI;
 import java.util.List;
 import java.util.Map;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/api/documents")
@@ -80,6 +80,13 @@ public class DocumentController {
         String userId = getCurrentUserId();
         documentService.removePermission(id, targetUserId, userId);
         return ResponseEntity.noContent().build();
+    }
+
+    //获取当前文档所有权限
+    @GetMapping("/{id}/permissions")
+    public ResponseEntity<Map<String, String>> getDocumentPermissions(@PathVariable String id) {
+        Map<String, String> permissions = documentService.getDocumentPermissions(id);
+        return ResponseEntity.ok(permissions);
     }
 
     //查询全部

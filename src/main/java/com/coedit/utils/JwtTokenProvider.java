@@ -154,4 +154,24 @@ public class JwtTokenProvider {
         }
         return jwtParser.parseSignedClaims(token).getPayload();
     }
+
+    /**
+     * 从JWT令牌中获取用户ID
+     * @param token JWT令牌
+     * @return 用户ID
+     */
+    public String getUserIdFromToken(String token) {
+        try {
+            if (token == null || token.isEmpty()) {
+                return null;
+            }
+            if (token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            }
+            Claims claims = parseToken(token);
+            return claims.get("userId", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }
